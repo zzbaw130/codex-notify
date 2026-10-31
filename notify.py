@@ -287,19 +287,25 @@ def spawn_finalizer(thread_id, turn_id, debounce):
         str(turn_id),
         str(debounce),
     ]
-    flags = subprocess.CREATE_NO_WINDOW
-    flags |= getattr(subprocess, "DETACHED_PROCESS", 0)
-    flags |= getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
-    with open(logfile, "ab") as out:
-        subprocess.Popen(
-            args,
-            cwd=PROJECT_DIR,
-            stdin=subprocess.DEVNULL,
-            stdout=out,
-            stderr=subprocess.STDOUT,
-            creationflags=flags,
-            close_fds=True,
+    popen_kwargs = {
+        "cwd": PROJECT_DIR,
+        "stdin": subprocess.DEVNULL,
+        "stderr": subprocess.STDOUT,
+        "close_fds": True,
+    }
+    if os.name == "nt":
+        # Windows: detached process without a console window.
+        popen_kwargs["creationflags"] = (
+            getattr(subprocess, "CREATE_NO_WINDOW", 0)
+            | getattr(subprocess, "DETACHED_PROCESS", 0)
+            | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
         )
+    else:
+        # Linux/macOS: detach from the invoking Codex session.
+        popen_kwargs["start_new_session"] = True
+    with open(logfile, "ab") as out:
+        subprocess.Popen(args, stdout=out, **popen_kwargs)
+
 
 
 def on_turn(cfg):

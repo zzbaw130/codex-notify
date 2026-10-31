@@ -213,24 +213,30 @@ def ask_provider(cfg):
     service = {"1": "wxpusher", "2": "serverchan", "3": "pushplus"}[choice]
 
     if service == "wxpusher":
-        old = (cfg.get("wxpusher_apptoken") or "").strip()
-        if old:
-            print("[INFO] 检测到已有 appToken: %s，输入新值将直接替换" % mask_key(old))
-        token = input("请输入 WxPusher appToken（AT 开头，见 https://wxpusher.zjiecode.com/admin/）: ").strip()
+        old_token = (cfg.get("wxpusher_apptoken") or "").strip()
+        if old_token:
+            print("[INFO] 检测到已有 appToken: %s，输入新值将直接替换" % mask_key(old_token))
+        token = input("请输入 WxPusher appToken（AT 开头，见 https://wxpusher.zjiecode.com/admin/）: ").strip() or old_token
         if not token:
             print("[ERROR] appToken 不能为空，已退出（未做任何修改）")
             return False
+        
+        old_uid = (cfg.get("wxpusher_uids") or "").strip()
+        if old_uid:
+            print("[INFO] 检测到已有 uid: %s，输入新值将直接替换" % mask_key(old_uid))
+        old_uid = input("请输入 WxPusher appToken（AT 开头，见 https://wxpusher.zjiecode.com/admin/）: ").strip() or old_uid
         uid = input("请输入你的 UID（UID 开头，多个用逗号分隔；公众号 wxpusher「我的」里可查）: ").strip()
         if not uid:
             print("[ERROR] UID 不能为空，已退出（未做任何修改）")
             return False
         cfg["wxpusher_apptoken"] = token
         cfg["wxpusher_uids"] = uid
+
     elif service == "serverchan":
         old = (cfg.get("serverchan_sendkey") or "").strip()
         if old:
             print("[INFO] 检测到已有 SendKey: %s，输入新值将直接替换" % mask_key(old))
-        key = input("请输入 Server酱 SendKey（形如 SCT...，见 https://sct.ftqq.com）: ").strip()
+        key = input("请输入 Server酱 SendKey（形如 SCT...，见 https://sct.ftqq.com）: ").strip() or old
         if not key:
             print("[ERROR] SendKey 不能为空，已退出（未做任何修改）")
             return False
@@ -239,7 +245,7 @@ def ask_provider(cfg):
         old = (cfg.get("pushplus_token") or "").strip()
         if old:
             print("[INFO] 检测到已有 token: %s，输入新值将直接替换" % mask_key(old))
-        key = input("请输入 PushPlus token（见 https://www.pushplus.plus）: ").strip()
+        key = input("请输入 PushPlus token（见 https://www.pushplus.plus）: ").strip() or old
         if not key:
             print("[ERROR] token 不能为空，已退出（未做任何修改）")
             return False
